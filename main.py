@@ -2,6 +2,11 @@ import secrets
 import string
 import pyperclip
 import customtkinter 
+from CTkToolTip import *
+
+# vars
+passwordHistory = []
+visibleHistory = False
 
 # functions
 def passwordGenerate():
@@ -17,8 +22,11 @@ def passwordGenerate():
     passwordVar.set(password)
 
     copyButton.configure(state = "normal")
+    clearButton.configure(state = "normal")
+    
+    passwordHistory.append(password)
+    updateHistory(password)
 
-#tkinter functions
 def lengthLabelUpdate(lengthVal):
     value = int(slider.get())
     sliderLabel.configure(text = f"Length: {value}")
@@ -28,21 +36,50 @@ def copyPass():
     copyConfirm.configure(text="Copied!")
     app.after(2000, lambda: copyConfirm.configure(text = ""))
 
+def updateHistory(password):
+    row = customtkinter.CTkFrame(historyPanel, fg_color="transparent")
+    row.pack(fill = "x", pady = 3, padx = 5)
+
+    display_pw = (password[:16] + "…") if len(password) > 16 else password
+    label = customtkinter.CTkLabel(row, text=display_pw, anchor = "w", font = ("Arial", 16))
+    label.pack(side = "left", fill = "x", expand = True)
+
+    if len(password) > 16:
+        CTkToolTip(label, message = password)
+
+    btn = customtkinter.CTkButton(row, text = "Copy 📋", width = 40, height = 28, command = lambda p = password: pyperclip.copy(p))
+    btn.pack(side = "right", padx = 5)
+
+def clearHistory():
+    passwordHistory.clear()
+    for widget in historyPanel.winfo_children():
+        widget.destroy()
+    clearButton.configure(state = "disabled")
+
+
 # system settings
 customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme("blue")
 
 # main frame
 app = customtkinter.CTk()
-app.geometry("720x300")
+app.geometry("1200x400")
 app.resizable(False, False)
 app.title("M0SA Password Generator")
 
-# UI
+# sidebar
+sidebar = customtkinter.CTkFrame(app, width = 250)
+sidebar.pack(side="right", fill="y", padx=5, pady=10)
+historyPanel = customtkinter.CTkScrollableFrame(sidebar, width = 250, label_text = "Password History", label_font = ("Arial", 16, "bold"))
+historyPanel.pack(fill = "both", expand = True, padx = 5)
+clearButton = customtkinter.CTkButton(sidebar, text="Clear History", command=clearHistory, font = ("Arial" , 18), state = "disabled")
+clearButton.pack(side = "bottom", fill ="both")
+
+# title
 title = customtkinter.CTkLabel(app, text = "Select Password Options", font = ("Arial", 32))
 title.pack(padx = 10, pady = 10)
 
-#options
+# options
 sliderFrame = customtkinter.CTkFrame(app, fg_color="transparent")
 sliderFrame.pack(pady = (10, 10), padx = 20, fill = "x")
 
