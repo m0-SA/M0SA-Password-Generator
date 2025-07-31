@@ -1,7 +1,8 @@
 import secrets
 import string
+import math
 import pyperclip
-import customtkinter 
+import customtkinter
 from CTkToolTip import *
 
 # vars
@@ -21,12 +22,42 @@ def passwordGenerate():
     password = ''.join(secrets.choice(alphabet) for i in range(int(slider.get())))
     passwordVar.set(password)
 
+    updateEntropy()
+
     copyButton.configure(state = "normal")
     clearButton.configure(state = "normal")
     
     passwordHistory.append(password)
     updateHistory(password)
 
+def estimateEntropy(length):
+    poolSize = len(string.ascii_lowercase)
+    if pUppercase.get():
+        poolSize += len(string.ascii_uppercase)
+    if pDigits.get():
+        poolSize += len(string.digits)
+    if pSymbols.get():
+        poolSize += len(string.punctuation)
+
+    return round(length * math.log2(poolSize), 2)
+
+def entropyStrengthLabel(entropy):
+    if entropy < 40:
+        return "Weak", "red"
+    elif entropy < 60:
+        return "Moderate", "orange"
+    elif entropy < 80:
+        return "Strong", "green"
+    else:
+        return "Very Strong", "blue"
+
+def updateEntropy():
+    entropy = estimateEntropy(slider.get())
+    label, colour = entropyStrengthLabel(entropy)
+    print(label)
+    print(colour)
+    entropyLabel.configure(text = f"Password Strength: {label}!", text_color = colour)
+    
 def copyPass():
     pyperclip.copy(passwordVar.get())
     copyConfirm.configure(text="Copied!")
@@ -171,6 +202,11 @@ passwordLabel.pack(pady = 10)
 
 copyConfirm = customtkinter.CTkLabel(app, text = "", font = ("Arial", 20), text_color = "green")
 copyConfirm.pack()
+
+# entropy
+
+entropyLabel = customtkinter.CTkLabel(app, text = "Password Strength: ", font = ("Arial", 16, "bold"))
+entropyLabel.pack(pady = 0)
 
 # run loop
 app.mainloop()
