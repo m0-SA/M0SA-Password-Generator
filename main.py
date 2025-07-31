@@ -4,6 +4,7 @@ import math
 import pyperclip
 import customtkinter
 from CTkToolTip import *
+from tkinter import Menu
 
 # vars
 passwordHistory = []
@@ -113,6 +114,21 @@ def adjustLength(delta):
     slider.set(float(newValue))
     entryChange(newValue)
 
+def contextMenu(event):
+    def dismissContext(e):
+        cMenu.unpost()
+        app.unbind("<Button-1>", dismissBinding)
+
+    def copyClose():
+        pyperclip.copy(passwordVar.get())
+        app.after(1, cMenu.unpost)
+
+    cMenu = Menu(app, tearoff = 0)
+    cMenu.add_command(label="Copy", command=copyClose)
+    cMenu.tk_popup(event.x_root, event.y_root)
+
+    dismissBinding = app.bind("<Button-1>", dismissContext)
+
 # system settings
 customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme("blue")
@@ -199,13 +215,13 @@ copyButton.pack(side = "left", padx = 10)
 passwordLabel = customtkinter.CTkEntry(app, textvariable = passwordVar, font = ("Arial", 18), width = 700, justify = "center")
 passwordLabel.configure(state = "readonly")
 passwordLabel.pack(pady = 10)
+passwordLabel.bind("<Button-3>", contextMenu)  # Right click
 
-copyConfirm = customtkinter.CTkLabel(app, text = "", font = ("Arial", 20), text_color = "green")
+copyConfirm = customtkinter.CTkLabel(app, text = "", font = ("Arial", 20), text_color = "blue")
 copyConfirm.pack()
 
 # entropy
-
-entropyLabel = customtkinter.CTkLabel(app, text = "Password Strength: ", font = ("Arial", 16, "bold"))
+entropyLabel = customtkinter.CTkLabel(app, text = "", font = ("Arial", 16, "bold"))
 entropyLabel.pack(pady = 0)
 
 # run loop
