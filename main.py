@@ -47,15 +47,13 @@ def entropyStrengthLabel(entropy):
     elif entropy < 60:
         return "Moderate", "orange"
     elif entropy < 80:
-        return "Strong", "green"
+        return "Strong", "yellow"
     else:
-        return "Very Strong", "blue"
+        return "Very Strong", "green"
 
 def updateEntropy():
     entropy = estimateEntropy(slider.get())
     label, colour = entropyStrengthLabel(entropy)
-    print(label)
-    print(colour)
     entropyLabel.configure(text = f"Password Strength: {label}!", text_color = colour)
     
 def copyPass():
@@ -67,12 +65,14 @@ def updateHistory(password):
     row = customtkinter.CTkFrame(historyPanel, fg_color="transparent")
     row.pack(fill = "x", pady = 3, padx = 5)
 
+    strengthColour = entropyLabel._text_color
     displayPW = (password[:24] + "…") if len(password) > 24 else password
-    label = customtkinter.CTkLabel(row, text = displayPW, anchor = "w", font = ("Arial", 16))
+    label = customtkinter.CTkLabel(row, text = displayPW, anchor = "w", font = ("Arial", 16), text_color = strengthColour)
+    
     label.pack(side = "left", fill = "x", expand = True)
 
     if len(password) > 24:
-        CTkToolTip(label, message = password)
+        CTkToolTip(label, message = password, bg_color = strengthColour)
 
     btn = customtkinter.CTkButton(row, text = "Copy 📋", width = 40, height = 28, command = lambda p = password: pyperclip.copy(p))
     btn.pack(side = "right", padx = 5)
