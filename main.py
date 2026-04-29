@@ -13,14 +13,37 @@ visibleHistory = False
 # functions
 def passwordGenerate():
     alphabet = string.ascii_lowercase
+    ucTrue = False
+    dTrue = False
+    sTrue = False
     if pUppercase.get():
         alphabet += string.ascii_uppercase
+        ucTrue = True
     if pDigits.get():
         alphabet += string.digits
+        dTrue = True
     if pSymbols.get():
         alphabet += string.punctuation
+        sTrue = True
 
-    password = ''.join(secrets.choice(alphabet) for i in range(int(slider.get())))
+    while True:
+        password = ''.join(secrets.choice(alphabet) for i in range(int(slider.get())))
+        if ucTrue:
+            hasUpper = any(c.isupper() for c in password)
+            if hasUpper:
+                ucTrue = False
+        if dTrue:
+            hasDigit = any(c.isdigit() for c in password)
+            if hasDigit:
+                dTrue = False
+        if sTrue:
+            hasSymbol = any(c in string.punctuation for c in password)
+            if hasSymbol:
+                sTrue = False
+        if ucTrue == False and dTrue == False and sTrue == False:
+            break
+        print("Missing required character types, regenerating...")
+  
     passwordVar.set(password)
 
     updateEntropy()
@@ -39,7 +62,7 @@ def estimateEntropy(length):
         poolSize += len(string.digits)
     if pSymbols.get():
         poolSize += len(string.punctuation)
-
+    
     return round(length * math.log2(poolSize), 2)
 
 def entropyStrengthLabel(entropy):
