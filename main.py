@@ -62,7 +62,6 @@ def estimateEntropy(length):
         poolSize += len(string.digits)
     if pSymbols.get():
         poolSize += len(string.punctuation)
-    
     return round(length * math.log2(poolSize), 2)
 
 def entropyStrengthLabel(entropy):
